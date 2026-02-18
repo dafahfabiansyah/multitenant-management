@@ -366,7 +366,275 @@ Authorization: Bearer <token>
 
 ---
 
-## 🔑 Role Hierarchy
+## � CRM - Contact Management Endpoints
+
+### 11. Create Contact
+Creates a new contact in the CRM system.
+
+**Endpoint:** `POST /contacts`
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Request Body:**
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "email": "jane.smith@example.com",
+  "phone": "+1-555-0123",
+  "mobile": "+1-555-0124",
+  "company_name": "ABC Corporation",
+  "position": "Marketing Manager",
+  "department": "Marketing",
+  "address": "123 Main Street",
+  "city": "New York",
+  "province": "NY",
+  "postal_code": "10001",
+  "country": "USA",
+  "status": "active",
+  "source": "referral",
+  "tags": ["vip", "enterprise"],
+  "notes": "Referred by John Doe"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "message": "Contact created successfully",
+  "contact": {
+    "id": 1,
+    "tenant_id": 1,
+    "created_by": 1,
+    "first_name": "Jane",
+    "last_name": "Smith",
+    "email": "jane.smith@example.com",
+    "phone": "+1-555-0123",
+    "mobile": "+1-555-0124",
+    "company_name": "ABC Corporation",
+    "position": "Marketing Manager",
+    "department": "Marketing",
+    "address": "123 Main Street",
+    "city": "New York",
+    "province": "NY",
+    "postal_code": "10001",
+    "country": "USA",
+    "status": "active",
+    "source": "referral",
+    "tags": ["vip", "enterprise"],
+    "notes": "Referred by John Doe",
+    "created_at": "2026-02-18T10:00:00Z",
+    "updated_at": "2026-02-18T10:00:00Z"
+  }
+}
+```
+
+---
+
+### 12. Get Contact by ID
+Retrieves a single contact by ID.
+
+**Endpoint:** `GET /contacts/:id`
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "contact": {
+    "id": 1,
+    "tenant_id": 1,
+    "created_by": 1,
+    "first_name": "Jane",
+    "last_name": "Smith",
+    "email": "jane.smith@example.com",
+    "phone": "+1-555-0123",
+    "company_name": "ABC Corporation",
+    "status": "active",
+    "source": "referral",
+    "tags": ["vip", "enterprise"],
+    "created_at": "2026-02-18T10:00:00Z",
+    "updated_at": "2026-02-18T10:00:00Z"
+  }
+}
+```
+
+---
+
+### 13. Get All Contacts (with Filtering)
+Retrieves a paginated list of contacts with advanced filtering.
+
+**Endpoint:** `GET /contacts`
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Query Parameters:**
+- `page` (int, default: 1) - Page number
+- `page_size` (int, default: 20) - Items per page
+- `search` (string) - Search across first_name, last_name, email, phone, company_name
+- `status` (string) - Filter by status: active, inactive, blocked
+- `source` (string) - Filter by source: website, referral, ads, cold_call, event
+- `city` (string) - Filter by city
+- `province` (string) - Filter by province/state
+- `tags` (string) - Comma-separated tags to filter (e.g., "vip,enterprise")
+
+**Example Request:**
+```
+GET /contacts?page=1&page_size=20&status=active&source=referral&search=Smith
+```
+
+**Response (200 OK):**
+```json
+{
+  "contacts": [
+    {
+      "id": 1,
+      "tenant_id": 1,
+      "created_by": 1,
+      "first_name": "Jane",
+      "last_name": "Smith",
+      "email": "jane.smith@example.com",
+      "phone": "+1-555-0123",
+      "company_name": "ABC Corporation",
+      "status": "active",
+      "source": "referral",
+      "tags": ["vip", "enterprise"],
+      "created_at": "2026-02-18T10:00:00Z"
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "page_size": 20,
+  "total_pages": 1
+}
+```
+
+---
+
+### 14. Search Contacts
+Quick search endpoint for contacts.
+
+**Endpoint:** `GET /contacts/search`
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Query Parameters:**
+- `q` (string, required) - Search query
+- `page` (int, default: 1)
+- `page_size` (int, default: 20)
+
+**Example Request:**
+```
+GET /contacts/search?q=Jane&page=1&page_size=20
+```
+
+**Response (200 OK):**
+```json
+{
+  "contacts": [
+    {
+      "id": 1,
+      "first_name": "Jane",
+      "last_name": "Smith",
+      "email": "jane.smith@example.com",
+      "company_name": "ABC Corporation"
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "page_size": 20,
+  "query": "Jane"
+}
+```
+
+---
+
+### 15. Update Contact
+Updates an existing contact.
+
+**Endpoint:** `PUT /contacts/:id`
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Request Body:** (all fields optional)
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Smith-Johnson",
+  "email": "jane.johnson@example.com",
+  "phone": "+1-555-0125",
+  "status": "active",
+  "notes": "Updated contact information"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "Contact updated successfully",
+  "contact": {
+    "id": 1,
+    "first_name": "Jane",
+    "last_name": "Smith-Johnson",
+    "email": "jane.johnson@example.com",
+    "updated_at": "2026-02-18T11:00:00Z"
+  }
+}
+```
+
+---
+
+### 16. Delete Contact
+Soft deletes a contact (can be restored from database).
+
+**Endpoint:** `DELETE /contacts/:id`
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "Contact deleted successfully"
+}
+```
+
+---
+
+### 📋 Contact Status & Source Values
+
+**Valid Status Values:**
+- `active` - Active contact (default)
+- `inactive` - Inactive contact  
+- `blocked` - Blocked contact
+
+**Valid Source Values:**
+- `website` - From website form
+- `referral` - Referred by existing customer
+- `ads` - From advertising campaign
+- `cold_call` - From cold calling
+- `event` - From event/conference
+
+---
+
+## �🔑 Role Hierarchy
 
 | Role | Permissions |
 |------|-------------|

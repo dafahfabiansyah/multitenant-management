@@ -11,6 +11,7 @@ func SetupRoutes(
 	router *gin.Engine,
 	authHandler *handler.AuthHandler,
 	tenantHandler *handler.TenantHandler,
+	contactHandler *handler.ContactHandler,
 ) {
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
@@ -57,6 +58,17 @@ func SetupRoutes(
 				managerRoutes.Use(middleware.RoleMiddleware("admin", "manager"))
 				{
 					managerRoutes.GET("/tenant/users", tenantHandler.GetTenantUsers)
+				}
+
+				// Contact routes (all authenticated tenant users)
+				contacts := tenant.Group("/contacts")
+				{
+					contacts.POST("", contactHandler.CreateContact)
+					contacts.GET("", contactHandler.GetContacts)
+					contacts.GET("/search", contactHandler.SearchContacts)
+					contacts.GET("/:id", contactHandler.GetContact)
+					contacts.PUT("/:id", contactHandler.UpdateContact)
+					contacts.DELETE("/:id", contactHandler.DeleteContact)
 				}
 			}
 		}

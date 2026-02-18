@@ -38,6 +38,7 @@ func main() {
 		&model.TenantUser{},
 		&model.TenantSetting{},
 		&model.AuditLog{},
+		&model.Contact{},
 	); err != nil {
 		log.Fatalf("❌ Failed to migrate database: %v", err)
 	}
@@ -48,15 +49,18 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	tenantUserRepo := repository.NewTenantUserRepository(db)
 	auditLogRepo := repository.NewAuditLogRepository(db)
+	contactRepo := repository.NewContactRepository(db)
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, tenantRepo, tenantUserRepo)
 	tenantService := service.NewTenantService(tenantRepo, tenantUserRepo, auditLogRepo)
 	auditService := service.NewAuditService(auditLogRepo)
+	contactService := service.NewContactService(contactRepo, auditLogRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService, tenantUserRepo)
 	tenantHandler := handler.NewTenantHandler(tenantService, auditService)
+	contactHandler := handler.NewContactHandler(contactService, auditService)
 
 	// Setup Gin router
 	gin.SetMode(config.AppConfig.Server.GinMode)
@@ -68,13 +72,11 @@ func main() {
 	router.Use(middleware.CORS())
 
 	// Setup routes
-	routes.SetupRoutes(router, authHandler, tenantHandler)
+	routes.SetupRoutes(router, authHandler, tenantHandler, contactHandler)
 
 	// Start server
 	port := config.AppConfig.Server.Port
 	log.Printf("🚀 Server starting on port %s", port)
-	log.Printf("📊 Multi-tenant Management System is ready!")
-	log.Printf("🔒 Security: Connection pooling, JWT auth, tenant isolation enabled")
 
 	if err := router.Run(fmt.Sprintf(":%s", port)); err != nil {
 		log.Fatalf("❌ Failed to start server: %v", err)
