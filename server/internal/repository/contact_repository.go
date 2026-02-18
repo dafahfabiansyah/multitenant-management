@@ -94,7 +94,8 @@ func (r *contactRepository) FindAll(tenantID uint, filter *model.ContactFilter, 
 }
 
 func (r *contactRepository) Update(contact *model.Contact) error {
-	return r.db.Save(contact).Error
+	// Use Updates to only update non-zero fields (for PATCH)
+	return r.db.Model(&model.Contact{}).Where("id = ?", contact.ID).Updates(contact).Error
 }
 
 // Delete performs soft delete

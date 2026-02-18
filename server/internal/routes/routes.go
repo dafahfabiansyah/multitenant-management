@@ -67,7 +67,7 @@ func SetupRoutes(
 					contacts.GET("", contactHandler.GetContacts)
 					contacts.GET("/search", contactHandler.SearchContacts)
 					contacts.GET("/:id", contactHandler.GetContact)
-					contacts.PUT("/:id", contactHandler.UpdateContact)
+					contacts.PATCH("/:id", contactHandler.UpdateContact)
 					contacts.DELETE("/:id", contactHandler.DeleteContact)
 				}
 			}

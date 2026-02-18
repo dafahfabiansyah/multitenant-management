@@ -562,16 +562,16 @@ GET /contacts/search?q=Jane&page=1&page_size=20
 ---
 
 ### 15. Update Contact
-Updates an existing contact.
+Updates an existing contact (partial update supported).
 
-**Endpoint:** `PUT /contacts/:id`
+**Endpoint:** `PATCH /contacts/:id`
 
 **Headers:**
 ```
 Authorization: Bearer <token>
 ```
 
-**Request Body:** (all fields optional)
+**Request Body:** (all fields optional, only send fields you want to update)
 ```json
 {
   "first_name": "Jane",
@@ -582,6 +582,8 @@ Authorization: Bearer <token>
   "notes": "Updated contact information"
 }
 ```
+
+**Note:** This is a PATCH endpoint, so you can send only the fields you want to update. Fields not included in the request will remain unchanged. `tenant_id` and `created_by` are immutable and cannot be changed.
 
 **Response (200 OK):**
 ```json

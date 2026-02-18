@@ -77,8 +77,10 @@ func (s *contactService) UpdateContact(tenantID uint, contact *model.Contact) er
 		return err
 	}
 
-	// Ensure tenant_id doesn't change
-	contact.TenantID = existing.TenantID
+	// Preserve immutable fields (set to zero so Updates() won't change them)
+	contact.TenantID = 0
+	contact.CreatedBy = 0
+	contact.ID = existing.ID // Ensure ID is set for WHERE clause
 
 	// Validate if status is being changed
 	if contact.Status != "" {
