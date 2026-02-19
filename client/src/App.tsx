@@ -3,6 +3,7 @@ import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { LoginPage, RegisterPage } from '@/pages/auth';
 import { DashboardPage } from '@/pages/dashboard/DashboardPage';
 import { ContactsPage } from '@/pages/contacts/ContactsPage';
+import { PipelinePage } from '@/pages/pipeline';
 import { SettingsPage } from '@/pages/settings/SettingsPage';
 import { useAuthStore } from '@/stores/authStore';
 import { Toaster } from '@/components/ui/sonner';
@@ -39,6 +40,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ContactsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/pipeline"
+            element={
+              <ProtectedRoute>
+                <PipelinePage />
               </ProtectedRoute>
             }
           />

@@ -6,6 +6,7 @@ import {
   Settings, 
   LogOut,
   Building2,
+  Target,
 } from 'lucide-react';
 
 interface NavItem {
@@ -18,6 +19,7 @@ interface NavItem {
 const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Contacts', href: '/dashboard/contacts', icon: Users },
+  { name: 'Pipeline', href: '/dashboard/pipeline', icon: Target },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings, requiredRole: 'admin' },
 ];
 

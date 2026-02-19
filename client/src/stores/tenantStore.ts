@@ -1,6 +1,15 @@
 import { create } from 'zustand';
 import apiClient from '@/lib/axios';
-import type { TenantState, TenantResponse, TenantUsersResponse, AuditLogsResponse, UpdateTenantRequest, UserRole } from '@/types';
+import type { 
+  TenantState, 
+  TenantResponse, 
+  TenantUsersResponse, 
+  AuditLogsResponse, 
+  UpdateTenantRequest, 
+  UserRole,
+  AddUserRequest,
+  AddUserResponse
+} from '@/types';
 
 export const useTenantStore = create<TenantState>((set, get) => ({
   tenantInfo: null,
@@ -58,6 +67,20 @@ export const useTenantStore = create<TenantState>((set, get) => ({
       });
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Failed to fetch users';
+      set({ error: errorMessage, isLoading: false });
+      throw error;
+    }
+  },
+
+  addUser: async (data: AddUserRequest) => {
+    set({ isLoading: true, error: null });
+    try {
+      await apiClient.post<AddUserResponse>('/tenant/users', data);
+      // Refresh user list after adding
+      await get().fetchTenantUsers(get().pagination.users.page, get().pagination.users.page_size);
+      set({ isLoading: false });
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || 'Failed to add user';
       set({ error: errorMessage, isLoading: false });
       throw error;
     }

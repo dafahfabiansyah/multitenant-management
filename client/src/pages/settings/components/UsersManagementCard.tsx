@@ -4,6 +4,7 @@ import { useTenantStore } from '@/stores/tenantStore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChangeRoleDialog } from './ChangeRoleDialog';
 import { RemoveUserDialog } from './RemoveUserDialog';
+import { AddUserDialog } from './AddUserDialog';
 import type { TenantUser, UserRole } from '@/types';
 
 export const UsersManagementCard = () => {
@@ -14,6 +15,7 @@ export const UsersManagementCard = () => {
   const [selectedUser, setSelectedUser] = useState<TenantUser | null>(null);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -79,8 +81,8 @@ export const UsersManagementCard = () => {
           </div>
           
           <button
-            className="flex items-center gap-2 rounded-lg border border-dashed border-primary bg-primary/5 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
-            title="Coming Soon - Backend endpoint needed"
+            onClick={() => setShowAddDialog(true)}
+            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             <UserPlus className="h-4 w-4" />
             Add User
@@ -263,6 +265,11 @@ export const UsersManagementCard = () => {
       )}
 
       {/* Dialogs */}
+      <AddUserDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+      />
+      
       {selectedUser && (
         <>
           <ChangeRoleDialog

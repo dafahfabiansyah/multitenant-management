@@ -83,6 +83,58 @@ export const updateUserRoleSchema = z.object({
   role: z.enum(['admin', 'manager', 'member']),
 });
 
+export const addUserSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .email('Invalid email format'),
+  password: z.string().optional(),
+  full_name: z.string().optional(),
+  role: z.enum(['admin', 'manager', 'member']),
+});
+
+// ============================================
+// Pipeline & Deal Validation Schemas
+// ============================================
+
+export const dealSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .max(200, 'Title too long'),
+  value: z
+    .number({ invalid_type_error: 'Value must be a number' })
+    .min(0, 'Value must be positive'),
+  currency: z.string(),
+  stage_id: z
+    .number({ invalid_type_error: 'Stage is required' })
+    .min(1, 'Stage is required'),
+  contact_id: z.number().optional(),
+  expected_close_date: z.string().optional(),
+  probability: z
+    .number()
+    .min(0, 'Probability must be between 0 and 100')
+    .max(100, 'Probability must be between 0 and 100')
+    .optional(),
+  description: z.string().optional(),
+});
+
+export const pipelineStageSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Stage name is required')
+    .max(100, 'Stage name too long'),
+  probability: z
+    .number({ invalid_type_error: 'Probability must be a number' })
+    .min(0, 'Probability must be between 0 and 100')
+    .max(100, 'Probability must be between 0 and 100'),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid color format (use #RRGGBB)'),
+  is_closed_won: z.boolean().optional(),
+  is_closed_lost: z.boolean().optional(),
+});
+
 // ============================================
 // Type exports for form data
 // ============================================
@@ -92,3 +144,6 @@ export type RegisterFormData = z.infer<typeof registerSchema>;
 export type ContactFormData = z.infer<typeof contactSchema>;
 export type UpdateTenantFormData = z.infer<typeof updateTenantSchema>;
 export type UpdateUserRoleFormData = z.infer<typeof updateUserRoleSchema>;
+export type AddUserFormData = z.infer<typeof addUserSchema>;
+export type DealFormData = z.infer<typeof dealSchema>;
+export type PipelineStageFormData = z.infer<typeof pipelineStageSchema>;
