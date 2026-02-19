@@ -33,11 +33,11 @@ export const useDealStore = create<DealState>((set, get) => ({
     const currentFilters = filters ? { ...get().filters, ...filters } : get().filters;
     set({ filters: currentFilters });
 
+
     try {
       const response = await apiClient.get<DealsResponse>('/deals', {
         params: currentFilters,
       });
-
       set({
         deals: response.data.deals,
         pagination: {
@@ -72,7 +72,7 @@ export const useDealStore = create<DealState>((set, get) => ({
       const response = await apiClient.post<{ deal: Deal }>('/deals', data);
       set({ isLoading: false });
       // Refresh deals after creation
-      await get().fetchDeals(get().filters);
+      await get().fetchDeals();
       return response.data.deal;
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Failed to create deal';
@@ -87,7 +87,7 @@ export const useDealStore = create<DealState>((set, get) => ({
       await apiClient.patch(`/deals/${id}`, data);
       set({ isLoading: false });
       // Refresh deals after update
-      await get().fetchDeals(get().filters);
+      await get().fetchDeals();
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Failed to update deal';
       set({ error: errorMessage, isLoading: false });
@@ -100,8 +100,8 @@ export const useDealStore = create<DealState>((set, get) => ({
     try {
       await apiClient.put(`/deals/${id}/move`, { stage_id: stageId });
       set({ isLoading: false });
-      // Refresh deals after move
-      await get().fetchDeals(get().filters);
+      // Refresh deals after move to get updated data from backend
+      await get().fetchDeals();
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Failed to move deal';
       set({ error: errorMessage, isLoading: false });
@@ -114,8 +114,8 @@ export const useDealStore = create<DealState>((set, get) => ({
     try {
       await apiClient.put(`/deals/${id}/status`, { status });
       set({ isLoading: false });
-      // Refresh deals after status update
-      await get().fetchDeals(get().filters);
+      // Refresh deals after status update - use stored filters
+      await get().fetchDeals();
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Failed to update deal status';
       set({ error: errorMessage, isLoading: false });
@@ -128,8 +128,8 @@ export const useDealStore = create<DealState>((set, get) => ({
     try {
       await apiClient.delete(`/deals/${id}`);
       set({ isLoading: false });
-      // Refresh deals after deletion
-      await get().fetchDeals(get().filters);
+      // Refresh deals after deletion - use stored filters
+      await get().fetchDeals();
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Failed to delete deal';
       set({ error: errorMessage, isLoading: false });

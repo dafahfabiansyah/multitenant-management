@@ -135,7 +135,7 @@ func (s *DealService) DeleteDeal(tenantID uint, id uint) error {
 // MoveToStage moves a deal to a different stage
 func (s *DealService) MoveToStage(tenantID uint, dealID uint, newStageID uint) (*model.Deal, error) {
 	// Verify deal exists
-	deal, err := s.dealRepo.FindByID(tenantID, dealID)
+	_, err := s.dealRepo.FindByID(tenantID, dealID)
 	if err != nil {
 		return nil, errors.New("deal not found")
 	}
@@ -146,23 +146,21 @@ func (s *DealService) MoveToStage(tenantID uint, dealID uint, newStageID uint) (
 		return nil, errors.New("invalid stage_id: stage not found")
 	}
 
-	// Move deal to new stage
-	if err := s.dealRepo.MoveToStage(tenantID, dealID, newStageID); err != nil {
-		return nil, err
+	// Prepare updates map
+	updates := map[string]interface{}{
+		"stage_id":    newStageID,
+		"probability": newStage.Probability,
 	}
-
-	// Update deal probability based on new stage
-	deal.StageID = newStageID
-	deal.Probability = newStage.Probability
 
 	// Update status based on stage terminal flags
 	if newStage.IsClosedWon {
-		deal.Status = "won"
+		updates["status"] = "won"
 	} else if newStage.IsClosedLost {
-		deal.Status = "lost"
+		updates["status"] = "lost"
 	}
 
-	if err := s.dealRepo.Update(deal); err != nil {
+	// Update all fields in one query using map
+	if err := s.dealRepo.UpdateFields(tenantID, dealID, updates); err != nil {
 		return nil, err
 	}
 

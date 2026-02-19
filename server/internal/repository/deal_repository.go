@@ -11,6 +11,7 @@ type DealRepository interface {
 	FindByID(tenantID uint, id uint) (*model.Deal, error)
 	Create(deal *model.Deal) error
 	Update(deal *model.Deal) error
+	UpdateFields(tenantID uint, dealID uint, updates map[string]interface{}) error
 	Delete(deal *model.Deal) error
 	MoveToStage(tenantID uint, dealID uint, newStageID uint) error
 	UpdateStatus(tenantID uint, dealID uint, status string) error
@@ -119,6 +120,14 @@ func (r *dealRepository) Update(deal *model.Deal) error {
 	deal.TenantID = 0
 	deal.CreatedBy = 0
 	return r.db.Model(deal).Updates(deal).Error
+}
+
+// UpdateFields updates specific fields of a deal
+func (r *dealRepository) UpdateFields(tenantID uint, dealID uint, updates map[string]interface{}) error {
+	return r.db.Model(&model.Deal{}).
+		Scopes(model.TenantScope(tenantID)).
+		Where("id = ?", dealID).
+		Updates(updates).Error
 }
 
 // Delete deletes a deal (soft delete)

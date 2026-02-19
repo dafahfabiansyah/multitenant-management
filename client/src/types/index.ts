@@ -236,8 +236,8 @@ export interface Deal {
   description?: string;
   value: number;
   currency: string;
-  contact_id: number;
-  stage_id: number;
+  contact_id?: number;  // Optional since backend may return nested contact instead
+  stage_id?: number;    // Optional since backend may return nested stage instead
   probability: number;
   status: DealStatus;
   expected_close_date?: string;

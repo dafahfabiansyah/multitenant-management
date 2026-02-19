@@ -20,12 +20,17 @@ export const PipelinePage = () => {
 
   useEffect(() => {
     fetchStages();
-    fetchDeals({ status: 'active' });
+    fetchDeals(); // Remove status filter temporarily to see all deals
     fetchPipelineValues();
   }, [fetchStages, fetchDeals, fetchPipelineValues]);
 
   const getDealsByStage = (stageId: number): Deal[] => {
-    return deals.filter(deal => deal.stage_id === stageId);
+    const filtered = deals.filter(deal => {
+      // Handle both nested stage object and primitive stage_id
+      const dealStageId = deal.stage?.id || deal.stage_id;
+      return dealStageId === stageId;
+    });
+    return filtered;
   };
 
   const formatCurrency = (value: number, currency: string = 'IDR'): string => {
@@ -45,16 +50,27 @@ export const PipelinePage = () => {
   };
 
   const handleDrop = async (stageId: number) => {
-    if (!draggedDeal || draggedDeal.stage_id === stageId) {
+    if (!draggedDeal) {
+      return;
+    }
+    
+    // Handle nested stage object
+    const currentStageId = draggedDeal.stage?.id || draggedDeal.stage_id;
+    if (currentStageId === stageId) {
       setDraggedDeal(null);
       return;
     }
 
+    const dealId = draggedDeal.id;
+
     try {
-      await moveDeal(draggedDeal.id, stageId);
+      // Move deal and refresh to get updated data from backend
+      await moveDeal(dealId, stageId);
       await fetchPipelineValues();
+      
+      toast.success('Deal moved successfully');
     } catch (error) {
-      console.error('Failed to move deal:', error);
+      toast.error('Failed to move deal');
     }
     setDraggedDeal(null);
   };
@@ -77,6 +93,7 @@ export const PipelinePage = () => {
     
     try {
       await deleteDeal(dealId);
+      // Store already auto-refreshes deals after deletion
       await fetchPipelineValues();
       toast.success('Deal deleted successfully');
     } catch (error: any) {
@@ -88,6 +105,7 @@ export const PipelinePage = () => {
   const handleMarkAsWon = async (dealId: number) => {
     try {
       await updateDealStatus(dealId, 'won');
+      // Store already auto-refreshes deals after status update
       await fetchPipelineValues();
       toast.success('Deal marked as won! 🎉');
     } catch (error: any) {
@@ -99,6 +117,7 @@ export const PipelinePage = () => {
   const handleMarkAsLost = async (dealId: number) => {
     try {
       await updateDealStatus(dealId, 'lost');
+      // Store already auto-refreshes deals after status update
       await fetchPipelineValues();
       toast.success('Deal marked as lost');
     } catch (error: any) {
