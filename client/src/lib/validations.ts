@@ -103,11 +103,11 @@ export const dealSchema = z.object({
     .min(1, 'Title is required')
     .max(200, 'Title too long'),
   value: z
-    .number({ invalid_type_error: 'Value must be a number' })
+    .number()
     .min(0, 'Value must be positive'),
   currency: z.string(),
   stage_id: z
-    .number({ invalid_type_error: 'Stage is required' })
+    .number()
     .min(1, 'Stage is required'),
   contact_id: z.number().optional(),
   expected_close_date: z.string().optional(),
@@ -125,7 +125,7 @@ export const pipelineStageSchema = z.object({
     .min(1, 'Stage name is required')
     .max(100, 'Stage name too long'),
   probability: z
-    .number({ invalid_type_error: 'Probability must be a number' })
+    .number()
     .min(0, 'Probability must be between 0 and 100')
     .max(100, 'Probability must be between 0 and 100'),
   color: z
