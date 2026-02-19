@@ -39,6 +39,8 @@ func main() {
 		&model.TenantSetting{},
 		&model.AuditLog{},
 		&model.Contact{},
+		&model.PipelineStage{},
+		&model.Deal{},
 	); err != nil {
 		log.Fatalf("❌ Failed to migrate database: %v", err)
 	}
@@ -50,17 +52,25 @@ func main() {
 	tenantUserRepo := repository.NewTenantUserRepository(db)
 	auditLogRepo := repository.NewAuditLogRepository(db)
 	contactRepo := repository.NewContactRepository(db)
+	pipelineStageRepo := repository.NewPipelineStageRepository(db)
+	dealRepo := repository.NewDealRepository(db)
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, tenantRepo, tenantUserRepo)
-	tenantService := service.NewTenantService(tenantRepo, tenantUserRepo, auditLogRepo)
+	tenantService := service.NewTenantService(tenantRepo, userRepo, tenantUserRepo, auditLogRepo)
 	auditService := service.NewAuditService(auditLogRepo)
 	contactService := service.NewContactService(contactRepo, auditLogRepo)
+	dashboardService := service.NewDashboardService(contactRepo, auditLogRepo)
+	pipelineStageService := service.NewPipelineStageService(pipelineStageRepo)
+	dealService := service.NewDealService(dealRepo, pipelineStageRepo, contactRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService, tenantUserRepo)
 	tenantHandler := handler.NewTenantHandler(tenantService, auditService)
 	contactHandler := handler.NewContactHandler(contactService, auditService)
+	dashboardHandler := handler.NewDashboardHandler(dashboardService)
+	pipelineStageHandler := handler.NewPipelineStageHandler(pipelineStageService, auditService)
+	dealHandler := handler.NewDealHandler(dealService, auditService)
 
 	// Setup Gin router
 	gin.SetMode(config.AppConfig.Server.GinMode)
@@ -72,7 +82,7 @@ func main() {
 	router.Use(middleware.CORS())
 
 	// Setup routes
-	routes.SetupRoutes(router, authHandler, tenantHandler, contactHandler)
+	routes.SetupRoutes(router, authHandler, tenantHandler, contactHandler, dashboardHandler, pipelineStageHandler, dealHandler)
 
 	// Start server
 	port := config.AppConfig.Server.Port

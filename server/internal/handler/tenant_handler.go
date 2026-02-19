@@ -120,6 +120,56 @@ func (h *TenantHandler) GetTenantUsers(c *gin.Context) {
 	})
 }
 
+// AddUser creates a new user or adds existing user to tenant
+func (h *TenantHandler) AddUser(c *gin.Context) {
+	tenantID := middleware.GetTenantID(c)
+
+	var req struct {
+		Email    string `json:"email" binding:"required,email"`
+		Password string `json:"password"` // Optional if user exists
+		FullName string `json:"full_name"`
+		Role     string `json:"role" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, isNewUser, err := h.tenantService.AddUser(tenantID, req.Email, req.Password, req.FullName, req.Role)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Log audit
+	action := "add_user"
+	if isNewUser {
+		action = "create_user"
+	}
+
+	h.auditService.Log(&model.AuditLog{
+		TenantID:   tenantID,
+		UserID:     middleware.GetUserID(c),
+		Action:     action,
+		Resource:   "user",
+		ResourceID: user.ID,
+		IPAddress:  c.ClientIP(),
+		UserAgent:  c.GetHeader("User-Agent"),
+	})
+
+	message := "User added to tenant successfully"
+	if isNewUser {
+		message = "User created and added to tenant successfully"
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message":     message,
+		"user":        user,
+		"is_new_user": isNewUser,
+	})
+}
+
 // UpdateUserRole updates a user's role in the tenant
 func (h *TenantHandler) UpdateUserRole(c *gin.Context) {
 	tenantID := middleware.GetTenantID(c)

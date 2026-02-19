@@ -3,6 +3,7 @@ package repository
 import (
 	"gin-quickstart/internal/model"
 	"strings"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -14,6 +15,7 @@ type ContactRepository interface {
 	Update(contact *model.Contact) error
 	Delete(tenantID, id uint) error
 	Search(tenantID uint, query string, page, pageSize int) ([]model.Contact, int64, error)
+	CountByDateRange(tenantID uint, startDate, endDate time.Time) (int, error)
 }
 
 type contactRepository struct {
@@ -110,4 +112,14 @@ func (r *contactRepository) Search(tenantID uint, query string, page, pageSize i
 		Search: query,
 	}
 	return r.FindAll(tenantID, filter, page, pageSize)
+}
+
+// CountByDateRange counts contacts created within date range
+func (r *contactRepository) CountByDateRange(tenantID uint, startDate, endDate time.Time) (int, error) {
+	var count int64
+	err := r.db.Model(&model.Contact{}).
+		Scopes(model.TenantScope(tenantID)).
+		Where("created_at BETWEEN ? AND ?", startDate, endDate).
+		Count(&count).Error
+	return int(count), err
 }

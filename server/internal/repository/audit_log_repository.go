@@ -2,6 +2,7 @@ package repository
 
 import (
 	"gin-quickstart/internal/model"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -10,6 +11,7 @@ type AuditLogRepository interface {
 	Create(log *model.AuditLog) error
 	FindByTenant(tenantID uint, page, pageSize int) ([]model.AuditLog, int64, error)
 	FindByUser(tenantID, userID uint, page, pageSize int) ([]model.AuditLog, int64, error)
+	CountByDateRange(tenantID uint, startDate, endDate time.Time) (int, error)
 }
 
 type auditLogRepository struct {
@@ -63,4 +65,13 @@ func (r *auditLogRepository) FindByUser(tenantID, userID uint, page, pageSize in
 	).Find(&logs).Error
 
 	return logs, total, err
+}
+
+// CountByDateRange counts audit logs created within date range
+func (r *auditLogRepository) CountByDateRange(tenantID uint, startDate, endDate time.Time) (int, error) {
+	var count int64
+	err := r.db.Model(&model.AuditLog{}).
+		Where("tenant_id = ? AND created_at BETWEEN ? AND ?", tenantID, startDate, endDate).
+		Count(&count).Error
+	return int(count), err
 }
