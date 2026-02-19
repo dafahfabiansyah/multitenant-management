@@ -179,42 +179,12 @@ export const UsersManagementCard = () => {
                       </p>
                     </td>
                     <td className="py-4 text-right">
-                      <div className="relative inline-block">
-                        <button
-                          onClick={() => setOpenMenuUserId(openMenuUserId === tenantUser.id ? null : tenantUser.id)}
-                          className="rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                        >
-                          <MoreVertical className="h-4 w-4" />
-                        </button>
-
-                        {/* Dropdown Menu */}
-                        {openMenuUserId === tenantUser.id && (
-                          <>
-                            <div 
-                              className="fixed inset-0 z-10" 
-                              onClick={() => setOpenMenuUserId(null)}
-                            />
-                            <div className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-border bg-card shadow-lg">
-                              <div className="py-1">
-                                <button
-                                  onClick={() => handleChangeRole(tenantUser)}
-                                  className="flex w-full items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
-                                >
-                                  <Edit className="h-4 w-4" />
-                                  Change Role
-                                </button>
-                                <button
-                                  onClick={() => handleRemoveUser(tenantUser)}
-                                  className="flex w-full items-center gap-2 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Remove User
-                                </button>
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
+                      <button
+                        onClick={() => setOpenMenuUserId(openMenuUserId === tenantUser.id ? null : tenantUser.id)}
+                        className="rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -252,6 +222,45 @@ export const UsersManagementCard = () => {
           </div>
         )}
       </div>
+
+      {/* Dropdown Menu - Rendered outside table to avoid overflow issues */}
+      {openMenuUserId !== null && (
+        <>
+          <div 
+            className="fixed inset-0 z-100" 
+            onClick={() => setOpenMenuUserId(null)}
+          />
+          <div 
+            className="fixed z-101 bg-card rounded-lg border border-border shadow-lg"
+            style={{
+              top: `${(document.activeElement as HTMLElement)?.getBoundingClientRect().bottom + 8}px`,
+              right: '24px',
+              minWidth: '192px'
+            }}
+          >
+            <div className="py-1">
+              {filteredUsers.find(u => u.id === openMenuUserId) && (
+                <>
+                  <button
+                    onClick={() => handleChangeRole(filteredUsers.find(u => u.id === openMenuUserId)!)}
+                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
+                  >
+                    <Edit className="h-4 w-4" />
+                    Change Role
+                  </button>
+                  <button
+                    onClick={() => handleRemoveUser(filteredUsers.find(u => u.id === openMenuUserId)!)}
+                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Remove User
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Dialogs */}
       {selectedUser && (
