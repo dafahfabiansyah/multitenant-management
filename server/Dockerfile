@@ -1,4 +1,4 @@
-# Build Stage
+# Build stage
 FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
@@ -8,9 +8,9 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app ./cmd
 
-# Run Stage
+# Run stage
 FROM alpine:latest
 
 WORKDIR /root/
