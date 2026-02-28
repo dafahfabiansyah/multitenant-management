@@ -27,7 +27,9 @@ services:
       DB_SSLMODE: disable
 
   frontend:
-    build: ./client
+    build: 
+      context: ./client
+      dockerfile: Dockerfile
     args:
       VITE_API_BASE_URL: https://api.clientra.dafbians.com/api
     container_name: react-client
