@@ -1,15 +1,32 @@
-version: "3.9"
-
 services:
   db:
     image: postgres:15
-    
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: multitenant_app
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   backend:
     build: ./server
     container_name: go-server
     ports:
       - "8080:8080"
+    depends_on:
+      - db
     restart: always
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: root
+      DB_NAME: multitenant_app
+      DB_SSLMODE: disable
 
   frontend:
     build: ./client
@@ -19,3 +36,6 @@ services:
     depends_on:
       - backend
     restart: always
+
+volumes:
+  postgres_data:
