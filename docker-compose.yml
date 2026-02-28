@@ -1,6 +1,9 @@
 version: "3.9"
 
 services:
+  db:
+    image: postgres:15
+    
   backend:
     build: ./server
     container_name: go-server
