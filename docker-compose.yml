@@ -28,6 +28,8 @@ services:
 
   frontend:
     build: ./client
+    args:
+      VITE_API_BASE_URL: https://api.clientra.dafbians.com/api
     container_name: react-client
     ports:
       - "3002:80"
